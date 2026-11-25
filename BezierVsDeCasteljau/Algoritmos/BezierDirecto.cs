@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BezierVsDeCasteljau.Algoritmos
 {
-    internal class NivelInterpolacion
+    internal class BezierDirecto
     {
     }
 }
