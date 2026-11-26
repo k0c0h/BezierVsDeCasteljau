@@ -52,6 +52,7 @@
     <Compile Include="Controladores\ComparadorAlgoritmos.cs" />
     <Compile Include="Controladores\GestorPuntos.cs" />
     <Compile Include="Controladores\MedidorRendimiento.cs" />
+    <Compile Include="Dibujo\DibujadorBezier.cs" />
     <Compile Include="Modelos\CurvaBezier.cs" />
     <Compile Include="Modelos\Punto2D.cs" />
     <Compile Include="Modelos\ResultadoComparacion.cs" />
