@@ -6,7 +6,24 @@ using System.Threading.Tasks;
 
 namespace BezierVsDeCasteljau.Modelos
 {
-    internal class Punto2D
+    public class Punto2D
     {
+        public double X { get; set; }
+        public double Y { get; set; }
+
+        public Punto2D()
+        {
+        }
+
+        public Punto2D(double x, double y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        public override string ToString()
+        {
+            return $"({X}, {Y})";
+        }
     }
 }
