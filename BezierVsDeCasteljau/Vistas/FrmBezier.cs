@@ -26,10 +26,13 @@ namespace BezierVsDeCasteljau.Vistas
         private AlgoritmoDeCasteljau algoritmoDeCasteljau;
         private ComparadorAlgoritmos comparador;
         private MedidorRendimiento medidor;
+        private List<NivelInterpolacion> nivelesInterpolacion;
 
         public FrmBezier()
         {
             InitializeComponent();
+
+            ConfigurarTemaPastel();
 
             controller = new BezierController();
             dibujador = new DibujadorBezier();
@@ -41,21 +44,98 @@ namespace BezierVsDeCasteljau.Vistas
             puntosCurvaDirecta = new List<Punto2D>();
             puntosCurvaCasteljau = new List<Punto2D>();
 
-            // Eventos de los botones.
-            btnAgregar.Click += btnAgregar_Click;
-            btnModificar.Click += btnModificar_Click;
-            btnEliminar.Click += btnEliminar_Click;
-            btnLimpiarPuntos.Click += btnLimpiarPuntos_Click;
-            btnCalcular.Click += btnCalcular_Click;
-            btnLimpiar.Click += btnLimpiar_Click;
-
-            // Evento para dibujar el plano.
-            panelGrafico.Paint += panelGrafico_Paint;
+            nivelesInterpolacion = new List<NivelInterpolacion>();
 
             ConfigurarTablaPuntos();
             ConfigurarTablaResultados();
 
-            lblGradoValor.Text = "Sin definir";
+        }
+
+        private void ConfigurarTemaPastel()
+        {
+            Color fondo = Color.FromArgb(255, 246, 249);
+            Color rosaClaro = Color.FromArgb(255, 232, 240);
+            Color duraznoClaro = Color.FromArgb(255, 237, 224);
+            Color moradoClaro = Color.FromArgb(242, 235, 250);
+            Color texto = Color.FromArgb(91, 61, 91);
+            Color borde = Color.FromArgb(216, 177, 205);
+
+            BackColor = fondo;
+            ForeColor = texto;
+            grpPuntos.BackColor = rosaClaro;
+            grpConfiguracion.BackColor = duraznoClaro;
+            grpVisualizacion.BackColor = moradoClaro;
+            grpResultados.BackColor = rosaClaro;
+            panelGrafico.BackColor = Color.FromArgb(255, 251, 253);
+
+            Button[] botones =
+            {
+                btnAgregar, btnModificar, btnEliminar, btnLimpiarPuntos,
+                btnCalcular, btnLimpiar
+            };
+
+            foreach (Button boton in botones)
+            {
+                boton.BackColor = Color.FromArgb(255, 220, 229);
+                boton.ForeColor = texto;
+                boton.FlatStyle = FlatStyle.Flat;
+                boton.FlatAppearance.BorderColor = borde;
+                boton.FlatAppearance.BorderSize = 1;
+            }
+
+            TextBox[] entradas = { txtX, txtY };
+            foreach (TextBox entrada in entradas)
+            {
+                entrada.BackColor = Color.White;
+                entrada.ForeColor = texto;
+            }
+
+            dgvPuntos.BackgroundColor = Color.FromArgb(255, 248, 251);
+            dgvPuntos.EnableHeadersVisualStyles = false;
+            dgvPuntos.GridColor = borde;
+            dgvPuntos.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(239, 211, 231);
+            dgvPuntos.ColumnHeadersDefaultCellStyle.ForeColor = texto;
+            dgvResultados.BackgroundColor = Color.FromArgb(255, 248, 251);
+            dgvResultados.EnableHeadersVisualStyles = false;
+            dgvResultados.GridColor = borde;
+            dgvResultados.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(239, 211, 231);
+            dgvResultados.ColumnHeadersDefaultCellStyle.ForeColor = texto;
+            dgvIteraciones.BackgroundColor = Color.FromArgb(255, 248, 251);
+            dgvIteraciones.EnableHeadersVisualStyles = false;
+            dgvIteraciones.GridColor = borde;
+
+            tabResultados.BackColor = moradoClaro;
+            tabComparacion.BackColor = Color.FromArgb(255, 248, 251);
+            tabInterpolaciones.BackColor = Color.FromArgb(255, 248, 251);
+
+            lblBezierDirecto.ForeColor = DibujadorBezier.ColorCurvaDirecta;
+            lblCasteljau.ForeColor = DibujadorBezier.ColorCurvaCasteljau;
+            lblPuntosControl.ForeColor = DibujadorBezier.ColorPoligonoControl;
+
+            AgregarMuestraColor(
+                DibujadorBezier.ColorCurvaDirecta,
+                new Point(30, 311));
+            AgregarMuestraColor(
+                DibujadorBezier.ColorCurvaCasteljau,
+                new Point(220, 311));
+            AgregarMuestraColor(
+                DibujadorBezier.ColorPoligonoControl,
+                new Point(400, 311));
+        }
+
+        private void AgregarMuestraColor(Color color, Point ubicacion)
+        {
+            Panel muestra = new Panel
+            {
+                BackColor = color,
+                BorderStyle = BorderStyle.FixedSingle,
+                Location = ubicacion,
+                Size = new Size(25, 12),
+                TabStop = false
+            };
+
+            grpVisualizacion.Controls.Add(muestra);
+            muestra.BringToFront();
         }
 
         // --------------------------------------------------
@@ -506,19 +586,20 @@ namespace BezierVsDeCasteljau.Vistas
         }
 
 
+
         private void MostrarInterpolaciones(
-    List<PointF> puntosControl,
-    float t)
+            List<PointF> puntosControl,
+            float t)
         {
             dgvIteraciones.Rows.Clear();
 
-            List<NivelInterpolacion> niveles =
+            nivelesInterpolacion =
                 algoritmoDeCasteljau.ObtenerNivelesPasoAPaso(
                     puntosControl,
                     t
                 );
 
-            foreach (NivelInterpolacion nivel in niveles)
+            foreach (NivelInterpolacion nivel in nivelesInterpolacion)
             {
                 for (int i = 0; i < nivel.Puntos.Count; i++)
                 {
@@ -532,7 +613,10 @@ namespace BezierVsDeCasteljau.Vistas
                     );
                 }
             }
+
+            panelGrafico.Invalidate();
         }
+
 
 
         private void ConfigurarTablaIteraciones()
@@ -588,6 +672,9 @@ namespace BezierVsDeCasteljau.Vistas
 
             lblErrorMaximo.Text =
                 "Error máximo: --";
+
+            nivelesInterpolacion.Clear();
+            dgvIteraciones.Rows.Clear();
         }
 
         // --------------------------------------------------
@@ -605,7 +692,8 @@ namespace BezierVsDeCasteljau.Vistas
                 panelGrafico.ClientSize.Height,
                 puntosControl,
                 puntosCurvaDirecta,
-                puntosCurvaCasteljau
+                puntosCurvaCasteljau,
+                nivelesInterpolacion
             );
         }
 

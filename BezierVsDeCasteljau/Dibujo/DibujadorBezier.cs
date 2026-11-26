@@ -7,11 +7,33 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using BezierVsDeCasteljau.Modelos;
 
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+
+using BezierVsDeCasteljau.Modelos;
+using BezierVsDeCasteljau.Algoritmos;
+
 namespace BezierVsDeCasteljau.Dibujo
 {
     public class DibujadorBezier
     {
         private const float Margen = 35;
+
+        public static readonly Color ColorCurvaDirecta = Color.FromArgb(224, 124, 174);
+        public static readonly Color ColorCurvaCasteljau = Color.FromArgb(145, 116, 190);
+        public static readonly Color ColorPoligonoControl = Color.FromArgb(240, 158, 103);
+
+        private readonly Color[] coloresNiveles =
+        {
+            Color.FromArgb(180, 170, 190),
+            Color.FromArgb(194, 149, 204),
+            Color.FromArgb(137, 190, 177),
+            Color.FromArgb(244, 177, 128),
+            Color.FromArgb(183, 145, 211),
+            Color.FromArgb(224, 135, 164)
+        };
 
         public void Dibujar(
             Graphics g,
@@ -19,20 +41,24 @@ namespace BezierVsDeCasteljau.Dibujo
             int alto,
             List<Punto2D> puntosControl,
             List<Punto2D> curvaDirecta,
-            List<Punto2D> curvaCasteljau)
+            List<Punto2D> curvaCasteljau,
+            List<NivelInterpolacion> niveles)
         {
             g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.Clear(Color.White);
+            g.Clear(Color.FromArgb(255, 251, 253));
 
             if (puntosControl == null || puntosControl.Count == 0)
             {
-                g.DrawString(
-                    "Agregue puntos de control para visualizar la curva.",
-                    new Font("Segoe UI", 10),
-                    Brushes.Gray,
-                    15,
-                    15
-                );
+                using (Font fuente = new Font("Segoe UI", 10))
+                {
+                    g.DrawString(
+                        "Agregue puntos de control para visualizar la curva.",
+                        fuente,
+                        Brushes.Gray,
+                        15,
+                        15
+                    );
+                }
 
                 return;
             }
@@ -42,10 +68,20 @@ namespace BezierVsDeCasteljau.Dibujo
             double minY = double.PositiveInfinity;
             double maxY = double.NegativeInfinity;
 
-            // Obtener límites considerando todos los puntos.
-            ObtenerLimites(puntosControl, ref minX, ref maxX, ref minY, ref maxY);
-            ObtenerLimites(curvaDirecta, ref minX, ref maxX, ref minY, ref maxY);
-            ObtenerLimites(curvaCasteljau, ref minX, ref maxX, ref minY, ref maxY);
+            ObtenerLimites(
+                puntosControl,
+                ref minX, ref maxX, ref minY, ref maxY
+            );
+
+            ObtenerLimites(
+                curvaDirecta,
+                ref minX, ref maxX, ref minY, ref maxY
+            );
+
+            ObtenerLimites(
+                curvaCasteljau,
+                ref minX, ref maxX, ref minY, ref maxY
+            );
 
             double rangoX = Math.Max(maxX - minX, 1);
             double rangoY = Math.Max(maxY - minY, 1);
@@ -55,7 +91,6 @@ namespace BezierVsDeCasteljau.Dibujo
             minY -= rangoY * 0.15;
             maxY += rangoY * 0.15;
 
-            // Convertir coordenadas matemáticas a coordenadas de pantalla.
             Func<double, float> convertirX = x =>
                 Margen + (float)(
                     (x - minX) / (maxX - minX) *
@@ -69,22 +104,40 @@ namespace BezierVsDeCasteljau.Dibujo
                 );
 
             DibujarCuadricula(g, ancho, alto);
-            DibujarEjes(g, ancho, alto, minX, maxX, minY, maxY,
-                convertirX, convertirY);
+
+            DibujarEjes(
+                g, ancho, alto,
+                minX, maxX, minY, maxY,
+                convertirX, convertirY
+            );
 
             DibujarPoligonoControl(
-                g, puntosControl, convertirX, convertirY);
+                g, puntosControl, convertirX, convertirY
+            );
+
+            // Curvas calculadas.
+            DibujarCurva(
+                g, curvaDirecta,
+                convertirX, convertirY,
+                ColorCurvaDirecta, 3
+            );
 
             DibujarCurva(
-                g, curvaDirecta, convertirX, convertirY,
-                Color.DodgerBlue, 3);
+                g, curvaCasteljau,
+                convertirX, convertirY,
+                ColorCurvaCasteljau, 2
+            );
 
-            DibujarCurva(
-                g, curvaCasteljau, convertirX, convertirY,
-                Color.SeaGreen, 2);
+            // Interpolaciones del algoritmo De Casteljau.
+            DibujarNiveles(
+                g, niveles,
+                convertirX, convertirY
+            );
 
             DibujarPuntosControl(
-                g, puntosControl, convertirX, convertirY);
+                g, puntosControl,
+                convertirX, convertirY
+            );
         }
 
         private void ObtenerLimites(
@@ -97,20 +150,22 @@ namespace BezierVsDeCasteljau.Dibujo
             if (puntos == null)
                 return;
 
-            foreach (Punto2D p in puntos)
+            foreach (Punto2D punto in puntos)
             {
-                if (p == null)
+                if (punto == null)
                     continue;
 
-                minX = Math.Min(minX, p.X);
-                maxX = Math.Max(maxX, p.X);
-                minY = Math.Min(minY, p.Y);
-                maxY = Math.Max(maxY, p.Y);
+                minX = Math.Min(minX, punto.X);
+                maxX = Math.Max(maxX, punto.X);
+                minY = Math.Min(minY, punto.Y);
+                maxY = Math.Max(maxY, punto.Y);
             }
         }
 
         private void DibujarCuadricula(
-            Graphics g, int ancho, int alto)
+            Graphics g,
+            int ancho,
+            int alto)
         {
             using (Pen pen = new Pen(Color.Gainsboro))
             {
@@ -122,8 +177,15 @@ namespace BezierVsDeCasteljau.Dibujo
                     float y = Margen +
                         i * (alto - 2 * Margen) / 10f;
 
-                    g.DrawLine(pen, x, Margen, x, alto - Margen);
-                    g.DrawLine(pen, Margen, y, ancho - Margen, y);
+                    g.DrawLine(
+                        pen, x, Margen,
+                        x, alto - Margen
+                    );
+
+                    g.DrawLine(
+                        pen, Margen, y,
+                        ancho - Margen, y
+                    );
                 }
             }
         }
@@ -144,13 +206,21 @@ namespace BezierVsDeCasteljau.Dibujo
                 if (minY <= 0 && maxY >= 0)
                 {
                     float y0 = convertirY(0);
-                    g.DrawLine(pen, Margen, y0, ancho - Margen, y0);
+
+                    g.DrawLine(
+                        pen, Margen, y0,
+                        ancho - Margen, y0
+                    );
                 }
 
                 if (minX <= 0 && maxX >= 0)
                 {
                     float x0 = convertirX(0);
-                    g.DrawLine(pen, x0, Margen, x0, alto - Margen);
+
+                    g.DrawLine(
+                        pen, x0, Margen,
+                        x0, alto - Margen
+                    );
                 }
             }
         }
@@ -161,10 +231,10 @@ namespace BezierVsDeCasteljau.Dibujo
             Func<double, float> convertirX,
             Func<double, float> convertirY)
         {
-            if (puntos.Count < 2)
+            if (puntos == null || puntos.Count < 2)
                 return;
 
-            using (Pen pen = new Pen(Color.DarkOrange, 1.5f))
+            using (Pen pen = new Pen(ColorPoligonoControl, 1.5f))
             {
                 pen.DashStyle = DashStyle.Dash;
 
@@ -207,30 +277,99 @@ namespace BezierVsDeCasteljau.Dibujo
             }
         }
 
+        private void DibujarNiveles(
+            Graphics g,
+            List<NivelInterpolacion> niveles,
+            Func<double, float> convertirX,
+            Func<double, float> convertirY)
+        {
+            if (niveles == null)
+                return;
+
+            using (Font fuente = new Font("Segoe UI", 8))
+            {
+                for (int i = 1; i < niveles.Count; i++)
+                {
+                    NivelInterpolacion nivel = niveles[i];
+
+                    Color color = coloresNiveles[
+                        Math.Min(i, coloresNiveles.Length - 1)
+                    ];
+
+                    using (Pen pen = new Pen(color, 2))
+                    using (Brush brush = new SolidBrush(color))
+                    {
+                        if (nivel.Puntos.Count > 1)
+                        {
+                            for (int j = 0;
+                                 j < nivel.Puntos.Count - 1;
+                                 j++)
+                            {
+                                PointF p1 = nivel.Puntos[j];
+                                PointF p2 = nivel.Puntos[j + 1];
+
+                                g.DrawLine(
+                                    pen,
+                                    convertirX(p1.X),
+                                    convertirY(p1.Y),
+                                    convertirX(p2.X),
+                                    convertirY(p2.Y)
+                                );
+                            }
+                        }
+
+                        foreach (PointF punto in nivel.Puntos)
+                        {
+                            float x = convertirX(punto.X);
+                            float y = convertirY(punto.Y);
+
+                            g.FillEllipse(
+                                brush,
+                                x - 4, y - 4, 8, 8
+                            );
+
+                            g.DrawString(
+                                "L" + nivel.Nivel,
+                                fuente,
+                                brush,
+                                x + 5,
+                                y + 5
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
         private void DibujarPuntosControl(
             Graphics g,
             List<Punto2D> puntos,
             Func<double, float> convertirX,
             Func<double, float> convertirY)
         {
-            for (int i = 0; i < puntos.Count; i++)
+            using (Font fuente = new Font("Segoe UI", 9))
+            using (Brush brush = new SolidBrush(ColorPoligonoControl))
             {
-                float x = convertirX(puntos[i].X);
-                float y = convertirY(puntos[i].Y);
+                for (int i = 0; i < puntos.Count; i++)
+                {
+                    float x = convertirX(puntos[i].X);
+                    float y = convertirY(puntos[i].Y);
 
-                g.FillEllipse(
-                    Brushes.DarkOrange,
-                    x - 5, y - 5, 10, 10
-                );
+                    g.FillEllipse(
+                        brush,
+                        x - 5, y - 5, 10, 10
+                    );
 
-                g.DrawString(
-                    "P" + i,
-                    new Font("Segoe UI", 9),
-                    Brushes.Black,
-                    x + 7,
-                    y - 18
-                );
+                    g.DrawString(
+                        "P" + i,
+                        fuente,
+                        Brushes.Black,
+                        x + 7,
+                        y - 18
+                    );
+                }
             }
         }
     }
 }
+

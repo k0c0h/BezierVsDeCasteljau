@@ -100,7 +100,7 @@
             this.grpPuntos.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.grpPuntos.Name = "grpPuntos";
             this.grpPuntos.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.grpPuntos.Size = new System.Drawing.Size(360, 410);
+            this.grpPuntos.Size = new System.Drawing.Size(360, 472);
             this.grpPuntos.TabIndex = 0;
             this.grpPuntos.TabStop = false;
             this.grpPuntos.Text = "Gestión de puntos de control";
@@ -108,12 +108,13 @@
             // btnLimpiarPuntos
             // 
             this.btnLimpiarPuntos.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnLimpiarPuntos.Location = new System.Drawing.Point(20, 350);
+            this.btnLimpiarPuntos.Location = new System.Drawing.Point(20, 412);
             this.btnLimpiarPuntos.Name = "btnLimpiarPuntos";
             this.btnLimpiarPuntos.Size = new System.Drawing.Size(150, 35);
             this.btnLimpiarPuntos.TabIndex = 8;
             this.btnLimpiarPuntos.Text = "Limpiar puntos";
             this.btnLimpiarPuntos.UseVisualStyleBackColor = true;
+            this.btnLimpiarPuntos.Click += new System.EventHandler(this.btnLimpiarPuntos_Click);
             // 
             // dgvPuntos
             // 
@@ -134,7 +135,7 @@
             this.dgvPuntos.RowHeadersWidth = 62;
             this.dgvPuntos.RowTemplate.Height = 28;
             this.dgvPuntos.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvPuntos.Size = new System.Drawing.Size(320, 100);
+            this.dgvPuntos.Size = new System.Drawing.Size(320, 162);
             this.dgvPuntos.TabIndex = 7;
             // 
             // colIndice
@@ -166,6 +167,7 @@
             this.btnEliminar.TabIndex = 6;
             this.btnEliminar.Text = "Eliminar punto";
             this.btnEliminar.UseVisualStyleBackColor = true;
+            this.btnEliminar.Click += new System.EventHandler(this.btnEliminar_Click);
             // 
             // btnModificar
             // 
@@ -175,6 +177,7 @@
             this.btnModificar.TabIndex = 5;
             this.btnModificar.Text = "Modificar punto";
             this.btnModificar.UseVisualStyleBackColor = true;
+            this.btnModificar.Click += new System.EventHandler(this.btnModificar_Click);
             // 
             // btnAgregar
             // 
@@ -184,6 +187,7 @@
             this.btnAgregar.TabIndex = 4;
             this.btnAgregar.Text = "Agregar punto";
             this.btnAgregar.UseVisualStyleBackColor = true;
+            this.btnAgregar.Click += new System.EventHandler(this.btnAgregar_Click);
             // 
             // txtY
             // 
@@ -228,30 +232,32 @@
             this.grpConfiguracion.Controls.Add(this.lblMuestras);
             this.grpConfiguracion.Controls.Add(this.lblGradoValor);
             this.grpConfiguracion.Controls.Add(this.lblGrado);
-            this.grpConfiguracion.Location = new System.Drawing.Point(10, 430);
+            this.grpConfiguracion.Location = new System.Drawing.Point(10, 489);
             this.grpConfiguracion.Name = "grpConfiguracion";
-            this.grpConfiguracion.Size = new System.Drawing.Size(360, 260);
+            this.grpConfiguracion.Size = new System.Drawing.Size(360, 201);
             this.grpConfiguracion.TabIndex = 1;
             this.grpConfiguracion.TabStop = false;
             this.grpConfiguracion.Text = "Configuración de la curva";
             // 
             // btnLimpiar
             // 
-            this.btnLimpiar.Location = new System.Drawing.Point(20, 195);
+            this.btnLimpiar.Location = new System.Drawing.Point(193, 150);
             this.btnLimpiar.Name = "btnLimpiar";
-            this.btnLimpiar.Size = new System.Drawing.Size(150, 40);
+            this.btnLimpiar.Size = new System.Drawing.Size(92, 40);
             this.btnLimpiar.TabIndex = 5;
             this.btnLimpiar.Text = "Reiniciar aplicación";
             this.btnLimpiar.UseVisualStyleBackColor = true;
+            this.btnLimpiar.Click += new System.EventHandler(this.btnLimpiar_Click);
             // 
             // btnCalcular
             // 
-            this.btnCalcular.Location = new System.Drawing.Point(20, 145);
+            this.btnCalcular.Location = new System.Drawing.Point(20, 150);
             this.btnCalcular.Name = "btnCalcular";
             this.btnCalcular.Size = new System.Drawing.Size(150, 40);
             this.btnCalcular.TabIndex = 4;
             this.btnCalcular.Text = "Calcular curvas";
             this.btnCalcular.UseVisualStyleBackColor = true;
+            this.btnCalcular.Click += new System.EventHandler(this.btnCalcular_Click);
             // 
             // numMuestras
             // 
@@ -326,7 +332,7 @@
             // lblPuntosControl
             // 
             this.lblPuntosControl.AutoSize = true;
-            this.lblPuntosControl.Location = new System.Drawing.Point(400, 310);
+            this.lblPuntosControl.Location = new System.Drawing.Point(435, 305);
             this.lblPuntosControl.Name = "lblPuntosControl";
             this.lblPuntosControl.Size = new System.Drawing.Size(169, 25);
             this.lblPuntosControl.TabIndex = 3;
@@ -335,7 +341,7 @@
             // lblCasteljau
             // 
             this.lblCasteljau.AutoSize = true;
-            this.lblCasteljau.Location = new System.Drawing.Point(220, 310);
+            this.lblCasteljau.Location = new System.Drawing.Point(255, 305);
             this.lblCasteljau.Name = "lblCasteljau";
             this.lblCasteljau.Size = new System.Drawing.Size(109, 25);
             this.lblCasteljau.TabIndex = 2;
@@ -344,7 +350,7 @@
             // lblBezierDirecto
             // 
             this.lblBezierDirecto.AutoSize = true;
-            this.lblBezierDirecto.Location = new System.Drawing.Point(30, 310);
+            this.lblBezierDirecto.Location = new System.Drawing.Point(65, 305);
             this.lblBezierDirecto.Name = "lblBezierDirecto";
             this.lblBezierDirecto.Size = new System.Drawing.Size(118, 25);
             this.lblBezierDirecto.TabIndex = 1;
@@ -360,6 +366,7 @@
             this.panelGrafico.Name = "panelGrafico";
             this.panelGrafico.Size = new System.Drawing.Size(920, 255);
             this.panelGrafico.TabIndex = 0;
+            this.panelGrafico.Paint += new System.Windows.Forms.PaintEventHandler(this.panelGrafico_Paint);
             // 
             // grpResultados
             // 
@@ -370,9 +377,9 @@
             this.grpResultados.Controls.Add(this.lblErrorPromedio);
             this.grpResultados.Controls.Add(this.lblTiempoCasteljau);
             this.grpResultados.Controls.Add(this.lblTiempoDirecto);
-            this.grpResultados.Location = new System.Drawing.Point(380, 370);
+            this.grpResultados.Location = new System.Drawing.Point(380, 430);
             this.grpResultados.Name = "grpResultados";
-            this.grpResultados.Size = new System.Drawing.Size(960, 320);
+            this.grpResultados.Size = new System.Drawing.Size(960, 260);
             this.grpResultados.TabIndex = 3;
             this.grpResultados.TabStop = false;
             this.grpResultados.Text = "Resultados y comparación de algoritmos";
@@ -387,7 +394,7 @@
             this.tabResultados.Location = new System.Drawing.Point(270, 25);
             this.tabResultados.Name = "tabResultados";
             this.tabResultados.SelectedIndex = 0;
-            this.tabResultados.Size = new System.Drawing.Size(670, 280);
+            this.tabResultados.Size = new System.Drawing.Size(670, 220);
             this.tabResultados.TabIndex = 5;
             // 
             // tabComparacion
@@ -396,7 +403,7 @@
             this.tabComparacion.Location = new System.Drawing.Point(4, 34);
             this.tabComparacion.Name = "tabComparacion";
             this.tabComparacion.Padding = new System.Windows.Forms.Padding(3);
-            this.tabComparacion.Size = new System.Drawing.Size(662, 242);
+            this.tabComparacion.Size = new System.Drawing.Size(662, 182);
             this.tabComparacion.TabIndex = 0;
             this.tabComparacion.Text = "Comparación";
             this.tabComparacion.UseVisualStyleBackColor = true;
@@ -420,7 +427,7 @@
             this.dgvResultados.ReadOnly = true;
             this.dgvResultados.RowHeadersWidth = 62;
             this.dgvResultados.RowTemplate.Height = 28;
-            this.dgvResultados.Size = new System.Drawing.Size(656, 236);
+            this.dgvResultados.Size = new System.Drawing.Size(656, 176);
             this.dgvResultados.TabIndex = 4;
             // 
             // colMuestra
@@ -478,7 +485,7 @@
             this.tabInterpolaciones.Location = new System.Drawing.Point(4, 34);
             this.tabInterpolaciones.Name = "tabInterpolaciones";
             this.tabInterpolaciones.Padding = new System.Windows.Forms.Padding(3);
-            this.tabInterpolaciones.Size = new System.Drawing.Size(662, 242);
+            this.tabInterpolaciones.Size = new System.Drawing.Size(662, 182);
             this.tabInterpolaciones.TabIndex = 1;
             this.tabInterpolaciones.Text = "Interpolaciones De Casteljau";
             this.tabInterpolaciones.UseVisualStyleBackColor = true;
@@ -491,7 +498,7 @@
             this.dgvIteraciones.Name = "dgvIteraciones";
             this.dgvIteraciones.RowHeadersWidth = 62;
             this.dgvIteraciones.RowTemplate.Height = 28;
-            this.dgvIteraciones.Size = new System.Drawing.Size(656, 236);
+            this.dgvIteraciones.Size = new System.Drawing.Size(656, 176);
             this.dgvIteraciones.TabIndex = 0;
             // 
             // lblErrorMaximo
