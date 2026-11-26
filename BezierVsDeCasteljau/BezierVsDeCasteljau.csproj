@@ -48,6 +48,8 @@
   <ItemGroup>
     <Compile Include="Algoritmos\AlgoritmoDeCasteljau.cs" />
     <Compile Include="Algoritmos\BezierDirecto.cs" />
+    <Compile Include="Algoritmos\Interpolacion.cs" />
+    <Compile Include="Algoritmos\NivelInterpolacion.cs" />
     <Compile Include="Controladores\BezierController.cs" />
     <Compile Include="Controladores\ComparadorAlgoritmos.cs" />
     <Compile Include="Controladores\GestorPuntos.cs" />

@@ -12,6 +12,7 @@ using BezierVsDeCasteljau.Modelos;
 using BezierVsDeCasteljau.Controladores;
 using BezierVsDeCasteljau.Dibujo;
 using BezierVsDeCasteljau.Utilidades;
+using BezierVsDeCasteljau.Algoritmos;
 
 namespace BezierVsDeCasteljau.Vistas
 {
@@ -22,6 +23,9 @@ namespace BezierVsDeCasteljau.Vistas
 
         private List<Punto2D> puntosCurvaDirecta;
         private List<Punto2D> puntosCurvaCasteljau;
+        private AlgoritmoDeCasteljau algoritmoDeCasteljau;
+        private ComparadorAlgoritmos comparador;
+        private MedidorRendimiento medidor;
 
         public FrmBezier()
         {
@@ -29,6 +33,10 @@ namespace BezierVsDeCasteljau.Vistas
 
             controller = new BezierController();
             dibujador = new DibujadorBezier();
+            algoritmoDeCasteljau = new AlgoritmoDeCasteljau();
+            comparador = new ComparadorAlgoritmos();
+            medidor = new MedidorRendimiento();
+            ConfigurarTablaIteraciones();
 
             puntosCurvaDirecta = new List<Punto2D>();
             puntosCurvaCasteljau = new List<Punto2D>();
@@ -215,6 +223,36 @@ namespace BezierVsDeCasteljau.Vistas
             }
         }
 
+        private List<PointF> ConvertirAPuntosF(List<Punto2D> puntos)
+        {
+            List<PointF> resultado = new List<PointF>();
+
+            foreach (Punto2D punto in puntos)
+            {
+                resultado.Add(new PointF(
+                    (float)punto.X,
+                    (float)punto.Y
+                ));
+            }
+
+            return resultado;
+        }
+
+        private List<Punto2D> ConvertirAPuntos2D(List<PointF> puntos)
+        {
+            List<Punto2D> resultado = new List<Punto2D>();
+
+            foreach (PointF punto in puntos)
+            {
+                resultado.Add(new Punto2D(
+                    punto.X,
+                    punto.Y
+                ));
+            }
+
+            return resultado;
+        }
+
         // --------------------------------------------------
         // ELIMINAR PUNTO
         // --------------------------------------------------
@@ -315,20 +353,26 @@ namespace BezierVsDeCasteljau.Vistas
         // CALCULAR CURVA
         // --------------------------------------------------
 
+
         private void btnCalcular_Click(object sender, EventArgs e)
         {
             try
             {
+                // Obtener la curva y la cantidad de muestras.
                 CurvaBezier curva = controller.CrearCurva();
-
                 int muestras = (int)numMuestras.Value;
 
-                // Calcular Bézier directo.
-                puntosCurvaDirecta =
-                    controller.CalcularBezierDirecto(curva, muestras);
+                // Obtener los puntos de control.
+                List<Punto2D> puntosControl =
+                    controller.GestorPuntos.ObtenerPuntosControl();
 
-                // Medir rendimiento del algoritmo directo.
-                MedidorRendimiento medidor = new MedidorRendimiento();
+                // Convertir los puntos para utilizar De Casteljau.
+                List<PointF> puntosControlF =
+                    ConvertirAPuntosF(puntosControl);
+
+                // -----------------------------------------
+                // MEDIR BEZIER DIRECTO
+                // -----------------------------------------
 
                 List<double> tiemposDirecto = medidor.MedirTiempos(
                     () => controller.CalcularBezierDirecto(curva, muestras),
@@ -338,37 +382,89 @@ namespace BezierVsDeCasteljau.Vistas
                 double promedioDirecto =
                     medidor.CalcularPromedio(tiemposDirecto);
 
+                // -----------------------------------------
+                // MEDIR DE CASTELJAU
+                // -----------------------------------------
+
+                // De Casteljau genera pasos + 1 puntos.
+                // Por eso utilizamos muestras - 1.
+                List<double> tiemposCasteljau = medidor.MedirTiempos(
+                    () => algoritmoDeCasteljau.GenerarCurva(
+                        puntosControlF,
+                        muestras - 1
+                    ),
+                    10
+                );
+
+                double promedioCasteljau =
+                    medidor.CalcularPromedio(tiemposCasteljau);
+
+                // -----------------------------------------
+                // OBTENER RESULTADOS DE AMBOS ALGORITMOS
+                // -----------------------------------------
+
+                puntosCurvaDirecta =
+                    controller.CalcularBezierDirecto(curva, muestras);
+
+                List<PointF> curvaCasteljauF =
+                    algoritmoDeCasteljau.GenerarCurva(
+                        puntosControlF,
+                        muestras - 1
+                    );
+
+                puntosCurvaCasteljau =
+                    ConvertirAPuntos2D(curvaCasteljauF);
+
+                // -----------------------------------------
+                // COMPARAR RESULTADOS
+                // -----------------------------------------
+
+                ResultadoComparacion resultado =
+                    comparador.Comparar(
+                        puntosCurvaDirecta,
+                        puntosCurvaCasteljau
+                    );
+
+                // -----------------------------------------
+                // MOSTRAR TIEMPOS Y ERRORES
+                // -----------------------------------------
+
                 lblTiempoDirecto.Text =
                     "Tiempo Bézier directo: " +
                     promedioDirecto.ToString("F6") + " ms";
 
-                // De Casteljau se integrará cuando esté disponible
-                // el algoritmo del integrante 2.
-                puntosCurvaCasteljau.Clear();
-
                 lblTiempoCasteljau.Text =
-                    "Tiempo De Casteljau: Pendiente";
+                    "Tiempo De Casteljau: " +
+                    promedioCasteljau.ToString("F6") + " ms";
 
                 lblErrorPromedio.Text =
-                    "Error promedio: Pendiente";
+                    "Error promedio: " +
+                    resultado.ErrorPromedio.ToString("F8");
 
                 lblErrorMaximo.Text =
-                    "Error máximo: Pendiente";
+                    "Error máximo: " +
+                    resultado.ErrorMaximo.ToString("F8");
 
+                // Mostrar comparación numérica.
                 MostrarResultadosDirectos();
 
+                // Mostrar las interpolaciones para t = 0.5.
+                MostrarInterpolaciones(puntosControlF, 0.5f);
+
+                // Actualizar dibujo.
                 panelGrafico.Invalidate();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
                     ex.Message,
-                    "Error al calcular la curva",
+                    "Error al calcular las curvas",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning
                 );
             }
         }
+
 
         // --------------------------------------------------
         // MOSTRAR RESULTADOS DIRECTOS
@@ -383,18 +479,76 @@ namespace BezierVsDeCasteljau.Vistas
                 double t = (double)i /
                     (puntosCurvaDirecta.Count - 1);
 
-                Punto2D punto = puntosCurvaDirecta[i];
+                Punto2D directo = puntosCurvaDirecta[i];
+                Punto2D casteljau = puntosCurvaCasteljau[i];
+
+                double diferenciaX =
+                    Math.Abs(directo.X - casteljau.X);
+
+                double diferenciaY =
+                    Math.Abs(directo.Y - casteljau.Y);
+
+                double error = Math.Sqrt(
+                    diferenciaX * diferenciaX +
+                    diferenciaY * diferenciaY
+                );
 
                 dgvResultados.Rows.Add(
                     i + 1,
                     t.ToString("F4"),
-                    punto.X.ToString("F4"),
-                    punto.Y.ToString("F4"),
-                    "--",
-                    "--",
-                    "--"
+                    directo.X.ToString("F4"),
+                    directo.Y.ToString("F4"),
+                    casteljau.X.ToString("F4"),
+                    casteljau.Y.ToString("F4"),
+                    error.ToString("F8")
                 );
             }
+        }
+
+
+        private void MostrarInterpolaciones(
+    List<PointF> puntosControl,
+    float t)
+        {
+            dgvIteraciones.Rows.Clear();
+
+            List<NivelInterpolacion> niveles =
+                algoritmoDeCasteljau.ObtenerNivelesPasoAPaso(
+                    puntosControl,
+                    t
+                );
+
+            foreach (NivelInterpolacion nivel in niveles)
+            {
+                for (int i = 0; i < nivel.Puntos.Count; i++)
+                {
+                    PointF punto = nivel.Puntos[i];
+
+                    dgvIteraciones.Rows.Add(
+                        nivel.Nivel,
+                        i,
+                        punto.X.ToString("F4"),
+                        punto.Y.ToString("F4")
+                    );
+                }
+            }
+        }
+
+
+        private void ConfigurarTablaIteraciones()
+        {
+            dgvIteraciones.Columns.Clear();
+
+            dgvIteraciones.Columns.Add("colNivel", "Nivel");
+            dgvIteraciones.Columns.Add("colPunto", "Punto");
+            dgvIteraciones.Columns.Add("colXIteracion", "X");
+            dgvIteraciones.Columns.Add("colYIteracion", "Y");
+
+            dgvIteraciones.ReadOnly = true;
+            dgvIteraciones.AllowUserToAddRows = false;
+            dgvIteraciones.AllowUserToDeleteRows = false;
+            dgvIteraciones.AutoSizeColumnsMode =
+                DataGridViewAutoSizeColumnsMode.Fill;
         }
 
         // --------------------------------------------------
