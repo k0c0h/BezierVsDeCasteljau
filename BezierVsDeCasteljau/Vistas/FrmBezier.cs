@@ -16,5 +16,10 @@ namespace BezierVsDeCasteljau.Vistas
         {
             InitializeComponent();
         }
+
+        private void lblMuestras_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
