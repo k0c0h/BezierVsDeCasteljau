@@ -6,7 +6,26 @@ using System.Threading.Tasks;
 
 namespace BezierVsDeCasteljau.Utilidades
 {
-    internal class GeneradorMuestras
+    public class GeneradorMuestras
     {
+        // Generar valores de t desde 0 hasta 1.
+        public List<double> GenerarMuestras(int cantidad)
+        {
+            if (cantidad < 2 || cantidad > 10000)
+            {
+                throw new ArgumentException(
+                    "La cantidad de muestras debe estar entre 2 y 10000.");
+            }
+
+            List<double> muestras = new List<double>();
+
+            for (int i = 0; i < cantidad; i++)
+            {
+                double t = (double)i / (cantidad - 1);
+                muestras.Add(t);
+            }
+
+            return muestras;
+        }
     }
 }
