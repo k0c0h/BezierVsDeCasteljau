@@ -48,10 +48,13 @@
   <ItemGroup>
     <Compile Include="Algoritmos\AlgoritmoDeCasteljau.cs" />
     <Compile Include="Algoritmos\BezierDirecto.cs" />
+    <Compile Include="Algoritmos\Interpolacion.cs" />
+    <Compile Include="Algoritmos\NivelInterpolacion.cs" />
     <Compile Include="Controladores\BezierController.cs" />
     <Compile Include="Controladores\ComparadorAlgoritmos.cs" />
     <Compile Include="Controladores\GestorPuntos.cs" />
     <Compile Include="Controladores\MedidorRendimiento.cs" />
+    <Compile Include="Dibujo\DibujadorBezier.cs" />
     <Compile Include="Modelos\CurvaBezier.cs" />
     <Compile Include="Modelos\Punto2D.cs" />
     <Compile Include="Modelos\ResultadoComparacion.cs" />
@@ -74,6 +77,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Vistas\FrmBezier.resx">
+      <DependentUpon>FrmBezier.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
